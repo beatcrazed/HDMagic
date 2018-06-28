@@ -1,0 +1,13 @@
+class MagicInitialized : Inventory {}
+
+class HDMagic_Bootstrap : EventHandler {
+	//initialize additional player inventory
+	override void PlayerEntered(PlayerEvent e) {
+		PlayerInfo player = players[e.PlayerNumber];
+		if(!player.mo.countinv("MagicInitialized")) {
+			player.mo.giveinventory("HDMagic_MagicController", 1);
+			player.mo.giveinventory("HDMagic_MagicBook", 1);
+			player.mo.giveinventory("MagicInitialized", 1);
+		}
+	}
+}

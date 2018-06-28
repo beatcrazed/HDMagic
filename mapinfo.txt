@@ -1,0 +1,3 @@
+GameInfo {
+	AddEventHandlers = "HDMagic_Bootstrap"
+}

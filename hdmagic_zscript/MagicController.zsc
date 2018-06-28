@@ -1,0 +1,59 @@
+class HDMagic_MagicController : CustomInventory {
+	int mana;
+	int maxmana;
+	int minfatigue;
+	HDPlayerPawn ownr;
+	
+	default {
+		+INVENTORY.AUTOACTIVATE;
+		+INVENTORY.PERSISTENTPOWER;
+	}
+	
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		let ownr = HDPlayerPawn(owner);
+		mana = 0;
+		maxmana = 100;
+		minfatigue = 0;
+	}	
+	
+	override void DoEffect() {
+		super.DoEffect();
+		let ownr = HDPlayerPawn(owner);
+		
+		
+		//Ticks
+		if(ownr.fatigue < minfatigue) { 
+			ownr.fatigue = minfatigue;
+		}
+		
+		//Seconds
+		if(level.time % 35 == 1) {
+			if(mana < maxmana) { 
+			mana++;
+			}
+			if(mana < 0) {
+				minfatigue++;
+				mana += 4;
+			}
+		}
+		
+		//Minutes
+		if(level.time % 2100 == 1) {
+			minfatigue -= 2;
+			if(minfatigue < 0) {
+				minfatigue = 0;
+			}
+		}
+	}
+	States {
+		Spawn:
+			TNT1 A -1;
+			stop;
+		Use:
+			TNT1 A 1;
+			loop;
+	}
+
+
+}

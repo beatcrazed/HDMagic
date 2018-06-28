@@ -1,0 +1,5 @@
+version "3.4"
+
+#include "hdmagic_zscript/Bootstrap.zsc"
+#include "hdmagic_zscript/MagicController.zsc"
+#include "hdmagic_zscript/Mbook.zsc"
