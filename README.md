@@ -1,1 +1,5 @@
 # HDMagic
+HDMagic is a magic mod for Hideous Destructor. It's a bit simple now because I'm doing this to learn Zscript, and am not that far along. 
+The end-goal here is to have a spell creation system in which you combine nine glyphs (order agnostic) and a spell parser will determine what effects the spell will have, how it will be delivered, etc.
+That's a little way away though. Right now I'm just making a spell for each concept which I want the spell system to be able to do. Once that's done I'll work on the spell parser and mixing interface. (the first interface will probably just be activatable inventory items, but given the large number of inventory items already in HD, that's probably not something I can leave the mod with.)
+If you stumble across this and like the idea, please wish me luck in completing it :D
