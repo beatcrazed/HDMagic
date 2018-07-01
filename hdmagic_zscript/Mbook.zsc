@@ -1,4 +1,4 @@
-class HDMagic_MagicBook : Fist {
+class HDMagic_MagicBook : HDWeapon {
 	HDMagic_MagicController tracker;
 	HDPlayerPawn ownr;
 	
@@ -19,11 +19,10 @@ class HDMagic_MagicBook : Fist {
 		amount = self.tracker.mana;
 		super.DoEffect();
 	}
-	action bool PressingReload(){return player.cmd.buttons&BT_RELOAD;}
 	States
 	{
 	Ready:
-		PUNG A 1 A_WeaponReady;
+		PUNG A 1 A_WeaponReady(WRF_ALL);
 		Loop;
 	Deselect:
 		PUNG A 1 A_Lower;
@@ -36,14 +35,14 @@ class HDMagic_MagicBook : Fist {
 		PUNG C 4 A_Punch;
 		PUNG D 5;
 		PUNG C 4;
-		PUNG B 5 A_ReFire;
+		PUNG B 5;
 		Goto Ready;
 	AltFire:
 		PUNG B 5;
 		TNT1 A 1 A_FirePlasma;
-		PUNG C 20 A_ReFire;
+		PUNG C 20;
 		Goto Ready;
-	Hold:
+	reload:
 		PUNG B 5;
 		TNT1 A 30 A_Heal;
 		Goto Ready;
@@ -60,6 +59,8 @@ class HDMagic_MagicBook : Fist {
 			ownr.unstablewoundcount -= 5;
 			ownr.aggravateddamage -= 2;
 			ownr.woundcount -= 5;
+			if(ownr.health + 10 <= ownr.maxhealth()) { ownr.health += 10; }
+			else { ownr.health = ownr.maxhealth() ; }
 			invoker.tracker.mana -= 30;
 		}
 	}
@@ -82,6 +83,7 @@ class HDMagic_MagicBook : Fist {
 		invoker.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
 		let ownr = HDPlayerPawn(invoker.owner);
 		invoker.tracker.mana -= 10;
+		ownr.giveinventory("HDMagic_FeatherToken", 1);
 		if (FindInventory("PowerStrength"))
 			damage *= 10;
 
@@ -110,6 +112,39 @@ class HDMagic_MagicBook : Fist {
 	}
 	
 }
+
+class HDMagic_FeatherToken : HDPickup
+{
+	HDPlayerPawn ownr;
+	int maxduration;
+	int currentduration;
+	
+	default {
+		Scale 0.5;
+		Inventory.PickupMessage "The load feels lighter";
+		Inventory.MaxAmount 10;
+		hdpickup.bulk -100;
+		-INVENTORY.INVBAR;
+		+INVENTORY.PERSISTENTPOWER;
+		+INVENTORY.IGNORESKILL;
+		+inventory.autoactivate;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		currentduration = 0;
+	}
+	override void DoEffect() {
+		maxduration = 2100;
+		currentduration += 1;
+		if(currentduration >= maxduration) {
+			let ownr = HDPlayerPawn(owner);
+			ownr.A_takeinventory("HDMagic_FeatherToken", 1);
+			currentduration -= 1000;
+		}
+	}
+}
+
+
 class Plasma : PlasmaBall
 {
 	Default
