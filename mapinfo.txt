@@ -1,3 +1,4 @@
 GameInfo {
 	AddEventHandlers = "HDMagic_Bootstrap"
+	statusbarclass="HDMagic_StatusBar"
 }

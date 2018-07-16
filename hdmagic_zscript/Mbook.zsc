@@ -38,33 +38,47 @@ class HDMagic_MagicBook : HDWeapon {
 		PUNG B 5;
 		Goto Ready;
 	AltFire:
-		PUNG B 5;
+		PUNG B 2;
 		TNT1 A 1 A_FirePlasma;
-		PUNG C 20;
+		PUNG C 2;
 		Goto Ready;
 	reload:
 		PUNG B 5;
 		TNT1 A 30 A_Heal;
+		Goto Ready;
+	zoom:
+		TNT1 A 30 A_Feather;
 		Goto Ready;
 	}
 	action void A_Heal()
 	{
 		if (player != null)
 		{
+			int cost;
 			player.health += 10;
 			invoker.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
 			let ownr = HDPlayerPawn(invoker.owner);
-			ownr.oldwoundcount -= 5;
-			ownr.burncount -= 5;
-			ownr.unstablewoundcount -= 5;
+			cost = (ownr.oldwoundcount + (ownr.burncount*3) + (ownr.unstablewoundcount*2) + (ownr.woundcount*7));
+			ownr.oldwoundcount = 0;
+			ownr.burncount = 0;
+			ownr.unstablewoundcount = 0;
 			ownr.aggravateddamage -= 2;
-			ownr.woundcount -= 5;
-			if(ownr.health + 10 <= ownr.maxhealth()) { ownr.health += 10; }
-			else { ownr.health = ownr.maxhealth() ; }
-			invoker.tracker.mana -= 30;
+			ownr.woundcount = 0;
+			if(ownr.health + 10 <= (ownr.maxhealth() * 1.5 )) { ownr.health += 10; }
+			else { ownr.health = (ownr.maxhealth() * 1.5 ) ; }
+			invoker.tracker.mana -= (cost + 10);
+			invoker.tracker.antimana += (cost / 5);
 		}
 	}
-
+	action void A_Feather()
+	{
+		invoker.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
+		let ownr = HDPlayerPawn(invoker.owner);
+		invoker.tracker.mana -= 10;
+		ownr.fatigue += 3;
+		ownr.bloodpressure += 5;
+		ownr.giveinventory("HDMagic_FeatherToken", 1);
+	}
 	action void A_Punch()
 	{
 		FTranslatedLineTarget t;
@@ -79,11 +93,12 @@ class HDMagic_MagicBook : HDWeapon {
 			}
 		}
 
-		int damage = random[Punch](6, 20) << 1;
+		int damage = random[Punch](50, 120) << 1;
 		invoker.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
 		let ownr = HDPlayerPawn(invoker.owner);
-		invoker.tracker.mana -= 10;
-		ownr.giveinventory("HDMagic_FeatherToken", 1);
+		invoker.tracker.antimana += 5;
+		invoker.tracker.mana -= 50;
+		ownr.zerk += 2000;
 		if (FindInventory("PowerStrength"))
 			damage *= 10;
 
@@ -106,7 +121,7 @@ class HDMagic_MagicBook : HDWeapon {
 			return;
 		}
 		invoker.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
-		invoker.tracker.mana -= 5;
+		invoker.tracker.mana -= 2;
 		Weapon weap = player.ReadyWeapon;
 		SpawnPlayerMissile ("Plasma");
 	}
@@ -149,16 +164,16 @@ class Plasma : PlasmaBall
 {
 	Default
 	{
-		Scale 2.5;
+		Scale 1.5;
 		Radius 13;
 		Height 8;
 		Speed 25;
-		Damage 200;
+		Damage 40;
 		Projectile;
 		+RANDOMIZE
 		+ZDOOMTRANS
 		RenderStyle "Add";
-		Alpha 0.75;
+		Alpha 0.3;
 		SeeSound "weapons/plasmaf";
 		DeathSound "weapons/plasmax";
 		Obituary "$OB_MPPLASMARIFLE";

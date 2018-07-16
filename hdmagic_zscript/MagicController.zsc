@@ -1,6 +1,7 @@
 class HDMagic_MagicController : CustomInventory {
 	int mana;
 	int maxmana;
+	int antimana;
 	int minfatigue;
 	HDPlayerPawn ownr;
 	
@@ -13,13 +14,13 @@ class HDMagic_MagicController : CustomInventory {
 		super.PostBeginPlay();
 		let ownr = HDPlayerPawn(owner);
 		mana = 0;
-		maxmana = 100;
 		minfatigue = 0;
 	}	
 	
 	override void DoEffect() {
 		super.DoEffect();
 		let ownr = HDPlayerPawn(owner);
+		maxmana = 100 - antimana;
 		
 		
 		//Ticks
@@ -29,13 +30,24 @@ class HDMagic_MagicController : CustomInventory {
 		
 		//Seconds
 		if(level.time % 35 == 1) {
-			if(mana < maxmana) { 
-			mana++;
-			}
 			if(mana < 0) {
-				minfatigue++;
+				antimana++;
 				mana += 4;
 			}
+			if(antimana > 100) { 
+			antimana -= 2;
+			minfatigue += 1;
+			}
+		}
+		//Seconds, but longer with more antimana
+		if(level.time % (35 + (antimana * 1)) == 1) {
+			if(mana < maxmana) {
+			mana++;
+			}
+		}
+		//Bi-minutely
+		if(level.time % 1050 == 1) {
+			if(antimana > 0) { antimana--;}
 		}
 		
 		//Minutes

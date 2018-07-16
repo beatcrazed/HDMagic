@@ -1,0 +1,65 @@
+class HDMagic_StatusBar:HDStatusbar{
+	HDMagic_MagicController tracker;
+	int manabars [25];
+	override void Draw(int state,double TicFrac){
+		hpl=hdplayerpawn(cplayer.mo);
+		if(
+			!cplayer
+			||!hpl
+			||hpl.countinv("WipedOut")
+		)return;
+		cplayer.inventorytics=0;
+
+		blurred=hpl.bshadow&&hpl.countinv("HDBlurSphere");
+
+		setwepsprites(cplayer.mo);
+
+		if(automapactive){
+			DrawAutomapHUD(ticfrac);
+			DrawAutomapStuff();
+		}else{
+			DrawAlwaysStuff();
+			DrawMagicDisplay();
+			if(hpl.health<1)return;
+			BeginHUD(forcescaled:true);
+			if(state==HUD_StatusBar){
+				DrawCommonStuff(state);
+			}
+			else if(state==HUD_Fullscreen){
+				DrawCommonStuff(state);
+				DrawFullScreenStuff();
+			}
+			else{
+				let www=cplayer.readyweapon;
+				if(
+					www is "HDBP"
+					||www is "MagManager"
+				)drawweaponstatus(www);
+			}
+		}
+		if(idmypos)drawmypos();
+	}
+	void DrawMagicDisplay(
+		vector2 drawpos=(30,-40),
+		int flags=DI_SCREEN_CENTER_BOTTOM
+	){
+		let cp=hdplayerpawn(cplayer.mo);
+		self.tracker = HDMagic_MagicController(cp.FindInventory("HDMagic_MagicController", false));
+		if(!hpl.beatcount){
+			for(int i=0;i<(STB_BEATERSIZE-2);i++){
+				manabars[i]=manabars[i+2];
+			}
+			int erraticalness=(tracker.mana / 12);
+			manabars[STB_BEATERSIZE-2]=clamp(2+random[heart](0, erraticalness),erraticalness/2,10);
+			manabars[STB_BEATERSIZE-1]=clamp(random[heart](0, erraticalness),erraticalness,8);
+		}
+		for(int i=0;i<STB_BEATERSIZE;i++){
+			drawimage(
+				(tracker.antimana>70?"REDPXL":tracker.antimana>33?"YELOPXL":"GREENPXL"),
+				drawpos+(i-(STB_BEATERSIZE>>2),0),
+				flags|DI_ITEM_CENTER|(tracker.antimana<70?DI_TRANSLATABLE:0),
+				scale:(0.8,manabars[i])
+			);
+		}
+	}
+}
