@@ -14,9 +14,11 @@ class HDMagic_MagicBook : HDWeapon {
 	}
 	
 	override void DoEffect() {
-		//Makes the book count mana instead of itself
+		//Makes the book count mana instead of itself but only update every second
 		self.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
-		amount = self.tracker.mana;
+		if(level.time % 35 == 1) {
+			amount = self.tracker.mana + random((-self.tracker.mana/7),(self.tracker.mana/7));
+		}
 		super.DoEffect();
 	}
 	States
@@ -123,7 +125,11 @@ class HDMagic_MagicBook : HDWeapon {
 		invoker.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
 		invoker.tracker.mana -= 2;
 		Weapon weap = player.ReadyWeapon;
-		SpawnPlayerMissile ("Plasma");
+		double ptch = pitch;
+		for (int prjnum = 1; prjnum < 10; prjnum++) {
+			A_FireProjectile("Plasma",frandom(-10,10),Pitch=ptch+frandom(-10,10));
+			pitch = ptch;
+		}
 	}
 	
 }
@@ -181,6 +187,9 @@ class Plasma : PlasmaBall
 	States
 	{
 	Spawn:
+		PLSE EDCBA 2 Bright;
+		Goto fly;
+	Fly:
 		PLSS AB 6 Bright;
 		Loop;
 	Death:

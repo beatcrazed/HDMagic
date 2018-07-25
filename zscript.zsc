@@ -1,4 +1,4 @@
-version "3.4"
+version "3.3.2"
 
 #include "hdmagic_zscript/Bootstrap.zsc"
 #include "hdmagic_zscript/MagicController.zsc"
