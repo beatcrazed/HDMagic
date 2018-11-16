@@ -1,0 +1,29 @@
+class HDMagic_GlyphToken : CustomInventory {
+	
+	default {
+		+INVENTORY.PERSISTENTPOWER;
+		INVENTORY.MAXAMOUNT 3;
+		-INVENTORY.INVBAR;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.IGNORESKILL;
+	}
+	States {
+		Spawn:
+			TNT1 A -1;
+			stop;
+		Use:
+			TNT1 A 1;
+			loop;
+	}
+}
+// These are all just for mixing spells later on.
+
+class HDMagic_GlyphPower : HDMagic_GlyphToken {}
+class HDMagic_GlyphIncrement : HDMagic_GlyphToken {}
+class HDMagic_GlyphDecrement : HDMagic_GlyphToken {}
+class HDMagic_GlyphRobustness : HDMagic_GlyphToken {}
+class HDMagic_GlyphHeat : HDMagic_GlyphToken {}
+class HDMagic_GlyphGravity : HDMagic_GlyphToken {}
+class HDMagic_GlyphProjection : HDMagic_GlyphToken {}
+class HDMagic_GlyphTime : HDMagic_GlyphToken {}
+class HDMagic_GlyphImbue : HDMagic_GlyphToken {}

@@ -1,0 +1,101 @@
+class HDMagic_Spell : CustomInventory {
+	HDMagic_MagicController tracker;
+	HDPlayerPawn ownr;
+	int manacost;
+	int antimanacost;
+	int gPower;
+	int gProjection;
+	int gRobustness;
+	int gHeat;
+	int gTime;
+	int gGravity;
+	int gImbue;
+	int gIncrementDecrement;
+	default {
+		+INVENTORY.AUTOACTIVATE;
+		-INVENTORY.INVBAR;
+		inventory.maxamount 4;
+	}
+	override void PostBeginPlay() {
+		self.gRobustness = self.owner.CountInv("HDMagic_GlyphRobustness");
+		self.gProjection = self.owner.CountInv("HDMagic_GlyphProjection");
+		self.gHeat = self.owner.CountInv("HDMagic_GlyphHeat");
+		self.gTime = self.owner.CountInv("HDMagic_GlyphTime");
+		self.gGravity = self.owner.CountInv("HDMagic_GlyphGravity");
+		self.gImbue = self.owner.CountInv("HDMagic_GlyphImbue");
+		self.gPower = self.owner.CountInv("HDMagic_GlyphPower");
+		self.gIncrementDecrement = (self.owner.countinv("HDMagic_GlyphIncrement") - self.owner.countinv("HDMagic_GlyphDecrement"));
+		super.PostBeginPlay();
+	}
+	override void DoEffect() {
+		return;
+	}
+	action void A_activate() {
+		return;
+	}
+	action void TakeSpell(string spell) {
+		invoker.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
+		let ownr = HDPlayerPawn(invoker.owner);
+		ownr.takeinventory(string.format("HDMagic_Spell%s", spell),1);
+	}
+	States {
+		Spawn:
+			TNT1 A -1 A_activate();
+			stop;
+		Use:
+			TNT1 A 1 A_activate();
+			loop;
+	}
+}
+
+class HDMagic_SavedSpell : HDMagic_Spell {
+	default{
+		inventory.maxamount 1;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+	}
+}
+
+class HDMagic_SpellHeal : HDMagic_Spell {
+	override void DoEffect() {
+		tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
+		let ownr = HDPlayerPawn(owner);
+		manacost = (ownr.oldwoundcount + (ownr.burncount*3) + (ownr.unstablewoundcount*2) + (ownr.woundcount*7));
+		antimanacost = manacost / 10;
+		ownr.oldwoundcount = 0;
+		ownr.burncount = 0;
+		ownr.unstablewoundcount = 0;
+		ownr.aggravateddamage -= 2;
+		ownr.woundcount = 0;
+		if(ownr.health + 10 <= (ownr.maxhealth() * 1.5 )) { ownr.giveinventory("health", 10); }
+		else { ownr.giveinventory("health", 1) ; }
+		tracker.mana -= (manacost + 10);
+		tracker.antimana += antimanacost;
+		ownr.takeinventory("HDMagic_SpellHeal", 1);
+	}
+}
+
+
+
+class HDMagic_SpellRegeneration : HDMagic_Spell {
+	int timedlife;
+	override void PostBeginPlay(){
+		timedlife = 0;
+	}
+	override void DoEffect() {
+		tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
+		let ownr = HDPlayerPawn(owner);
+		if(timedlife == 1) {
+			tracker.mana -= 40;
+			timedlife += 1;
+		}
+		if(level.time % 15 == 1) {
+			ownr.giveinventory("health", 1);
+			timedlife += 1;
+		}
+		if(timedlife > 100) {
+			ownr.takeinventory("HDMagic_SpellRegeneration",1);
+		}
+	}
+}

@@ -11,18 +11,18 @@ class HDMagic_MagicBook : HDWeapon {
 		+INVENTORY.INVBAR;
 		+INVENTORY.PERSISTENTPOWER;
 		+INVENTORY.IGNORESKILL;
+		+INVENTORY.UNDROPPABLE;
 	}
 	
 	override void DoEffect() {
 		//Makes the book count mana instead of itself but only update every second
 		self.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
 		if(level.time % 35 == 1) {
-			amount = self.tracker.mana + random((-self.tracker.mana/7),(self.tracker.mana/7));
+			amount = self.tracker.mana;
 		}
 		super.DoEffect();
 	}
-	States
-	{
+	States {
 	Ready:
 		PUNG A 1 A_WeaponReady(WRF_ALL);
 		Loop;
@@ -44,6 +44,9 @@ class HDMagic_MagicBook : HDWeapon {
 		TNT1 A 1 A_FirePlasma;
 		PUNG C 2;
 		Goto Ready;
+	unload:
+		PUNG B 50;
+		Goto Ready;
 	reload:
 		PUNG B 5;
 		TNT1 A 30 A_Heal;
@@ -56,30 +59,17 @@ class HDMagic_MagicBook : HDWeapon {
 	{
 		if (player != null)
 		{
-			int cost;
-			player.health += 10;
 			invoker.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
 			let ownr = HDPlayerPawn(invoker.owner);
-			cost = (ownr.oldwoundcount + (ownr.burncount*3) + (ownr.unstablewoundcount*2) + (ownr.woundcount*7));
-			ownr.oldwoundcount = 0;
-			ownr.burncount = 0;
-			ownr.unstablewoundcount = 0;
-			ownr.aggravateddamage -= 2;
-			ownr.woundcount = 0;
-			if(ownr.health + 10 <= (ownr.maxhealth() * 1.5 )) { ownr.health += 10; }
-			else { ownr.health = (ownr.maxhealth() * 1.5 ) ; }
-			invoker.tracker.mana -= (cost + 10);
-			invoker.tracker.antimana += (cost / 5);
+			A_FireProjectile("HDMagic_DoorBuster");
+
 		}
 	}
 	action void A_Feather()
 	{
 		invoker.tracker = HDMagic_MagicController(FindInventory("HDMagic_MagicController", false));
 		let ownr = HDPlayerPawn(invoker.owner);
-		invoker.tracker.mana -= 10;
-		ownr.fatigue += 3;
-		ownr.bloodpressure += 5;
-		ownr.giveinventory("HDMagic_FeatherToken", 1);
+		ownr.giveinventory("HDMagic_SpellRegeneration", 1);
 	}
 	action void A_Punch()
 	{
@@ -126,8 +116,8 @@ class HDMagic_MagicBook : HDWeapon {
 		invoker.tracker.mana -= 2;
 		Weapon weap = player.ReadyWeapon;
 		double ptch = pitch;
-		for (int prjnum = 1; prjnum < 10; prjnum++) {
-			A_FireProjectile("Plasma",frandom(-10,10),Pitch=ptch+frandom(-10,10));
+		for (int prjnum = 0; prjnum < 10; prjnum++) {
+			A_FireProjectile("MageImpBall",frandom(-10,10),pitch=ptch+frandom(-10,10));
 			pitch = ptch;
 		}
 	}
@@ -166,34 +156,12 @@ class HDMagic_FeatherToken : HDPickup
 }
 
 
-class Plasma : PlasmaBall
+class HDMagic_DoorBuster : HDImpBall
 {
-	Default
-	{
-		Scale 1.5;
-		Radius 13;
-		Height 8;
-		Speed 25;
-		Damage 40;
-		Projectile;
-		+RANDOMIZE
-		+ZDOOMTRANS
-		RenderStyle "Add";
-		Alpha 0.3;
-		SeeSound "weapons/plasmaf";
-		DeathSound "weapons/plasmax";
-		Obituary "$OB_MPPLASMARIFLE";
-	}
 	States
 	{
-	Spawn:
-		PLSE EDCBA 2 Bright;
-		Goto fly;
-	Fly:
-		PLSS AB 6 Bright;
-		Loop;
-	Death:
-		PLSE ABCDE 4 Bright;
-		Stop;
+	death:
+		BAL1 C 0{doordestroyer.destroydoor(self);}
+		goto super::death;
 	}
 }

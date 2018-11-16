@@ -7,6 +7,8 @@ class HDMagic_Bootstrap : EventHandler {
 		if(!player.mo.countinv("MagicInitialized")) {
 			player.mo.giveinventory("HDMagic_MagicController", 1);
 			player.mo.giveinventory("HDMagic_MagicBook", 1);
+			player.mo.giveinventory("HDMagic_NewBook", 1);
+			player.mo.giveinventory("HDMagic_SpellMixer", 1);
 			player.mo.giveinventory("MagicInitialized", 1);
 		}
 	}

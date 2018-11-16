@@ -3,6 +3,7 @@ class HDMagic_MagicController : CustomInventory {
 	int maxmana;
 	int antimana;
 	int minfatigue;
+	int magicpressure;
 	HDPlayerPawn ownr;
 	
 	default {
@@ -13,14 +14,15 @@ class HDMagic_MagicController : CustomInventory {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		let ownr = HDPlayerPawn(owner);
-		mana = 0;
+		mana = 100;
+		antimana = 100;
 		minfatigue = 0;
 	}	
 	
 	override void DoEffect() {
 		super.DoEffect();
 		let ownr = HDPlayerPawn(owner);
-		maxmana = 100 - antimana;
+		maxmana = 100 - clamp(antimana - 100, 0, 100);
 		
 		
 		//Ticks
@@ -28,15 +30,28 @@ class HDMagic_MagicController : CustomInventory {
 			ownr.fatigue = minfatigue;
 		}
 		
-		//Seconds
-		if(level.time % 35 == 1) {
+		//Seconds?
+		if(level.time % 10 == 1) {
 			if(mana < 0) {
 				antimana++;
 				mana += 4;
 			}
-			if(antimana > 100) { 
-			antimana -= 2;
-			minfatigue += 1;
+			if(antimana < 201) {
+				if(magicpressure > 0) {
+					magicpressure -= 10;
+					ownr.bloodpressure -= 9;
+				}
+			}
+			
+			if(antimana > 200) {
+				ownr.fatigue += 1;
+				ownr.bloodpressure += 1;
+			}
+			if(antimana > 202) { 
+				antimana -= 1;
+				ownr.fatigue += 2.5;
+				ownr.bloodpressure += 10;
+				magicpressure += 10;
 			}
 		}
 		//Seconds, but longer with more antimana
